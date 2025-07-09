@@ -1,28 +1,26 @@
-const express = require('express');
-const axios = require('axios');
+import express from 'express';
+
 const app = express();
 
-app.use(express.json());
-
-// POST /sendTelegram
-app.post('/sendTelegram', async (req, res) => {
-  const { token, chat_id, text } = req.body;
+// GET /sendTelegram?token=...&chat_id=...&text=...
+app.get('/sendTelegram', async (req, res) => {
+  const { token, chat_id, text } = req.query;
 
   if (!token || !chat_id || !text) {
-    return res.status(400).json({ error: 'Missing parameters' });
+    return res.status(400).json({ error: 'Missing token, chat_id or text' });
   }
 
-  try {
-    const response = await axios.post(`https://api.telegram.org/bot${token}/sendMessage`, {
-      chat_id,
-      text
-    });
+  const url = `https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage` +
+              `?chat_id=${encodeURIComponent(chat_id)}&text=${encodeURIComponent(text)}`;
 
-    res.json({ success: true, data: response.data });
+  try {
+    const tgRes = await fetch(url);
+    const data = await tgRes.json();
+    res.json({ success: true, data });
   } catch (err) {
-    res.status(500).json({ error: 'Failed to send message', details: err.message });
+    res.status(500).json({ error: err.message });
   }
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Telegram relay server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Telegram relay server running on port ${PORT}`));
