@@ -7,7 +7,7 @@ app.get('/sendTelegram', async (req, res) => {
   const { token, chat_id, text } = req.query;
 
   if (!token || !chat_id || !text) {
-    return res.status(400).json({ error: 'Missing token, chat_id or text' });
+    return res.status(200).json({ error: 'Missing token, chat_id or text' });
   }
 
   const url = `https://api.telegram.org/bot${encodeURIComponent(token)}/sendMessage` +
